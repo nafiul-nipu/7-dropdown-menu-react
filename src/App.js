@@ -1,5 +1,7 @@
 import './App.css';
+import './ReactDropdown.css'
 import {scaleLinear,  format, extent} from 'd3';
+import ReactDropdown from 'react-dropdown';
 
 import { useData } from './components/useData';
 import { AxisBottom } from './components/AxisBottom';
@@ -34,6 +36,7 @@ const getLbael = value => {
 }
 
 function App() {
+  // console.log(ReactDropdown)
   const data = useData()
 
   const initialxAttribute = 'petal_length'
@@ -70,21 +73,21 @@ function App() {
 
   return (
     <>
-      <label for='x-select'>X:</label>
-      <Dropdown
-        options={attributes}
-        id='x-select'
-        selectedValue={xAttribute}
-        onSelectedValueChane={setxAttribute}
-      />
+      <div className='menu-container'>
+        <span className='dropdown-label'>X</span>
+          <ReactDropdown
+            options={attributes}
+            value={xAttribute}
+            onChange={({value}) => setxAttribute(value)}
+          />
 
-      <label for='y-select'>Y:</label>
-      <Dropdown
-        options={attributes}
-        id='y-select'
-        selectedValue={yAttribute}
-        onSelectedValueChane={setyAttribute}
-      />
+          <span className='dropdown-label'>Y</span>
+          <ReactDropdown
+            options={attributes}
+            value={yAttribute}
+            onChange={({value}) => setyAttribute(value)}
+        />
+      </div>        
 
       <svg width={width} height={height}>
         <g transform={`translate(${margin.left}, ${margin.top})`}>
