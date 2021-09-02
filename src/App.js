@@ -1,6 +1,6 @@
 import './App.css';
 import './ReactDropdown.css'
-import {scaleLinear,  format, extent} from 'd3';
+import {scaleOrdinal, scaleLinear,  format, extent} from 'd3';
 import ReactDropdown from 'react-dropdown';
 
 import { useData } from './components/useData';
@@ -9,15 +9,19 @@ import { AxisLeft } from './components/AxisLeft';
 import { Scatter } from './components/Scatter';
 import {Dropdown} from './components/Dropdown'
 import { useState } from 'react';
+import { ColorLegend } from './components/ColorLegend';
 
 const width = 960;
 const menuHeight = 75;
 const height = 500 - menuHeight;
-const margin = {top:20, right:30, bottom:65, left:90} 
+const margin = {top:20, right:200, bottom:65, left:90} 
 
 const xAxisLabelOffset = 50
 const yAxisLabelOffset = 40
 
+const radius = 7
+
+const fadeOpacity = 0.2
 
 const attributes = [
   { value: "sepal_length", label:"Sepal Length"}, 
@@ -38,6 +42,7 @@ const getLbael = value => {
 function App() {
   // console.log(ReactDropdown)
   const data = useData()
+  const [hoveredValue, setHoveredValue] = useState(null)
 
   const initialxAttribute = 'petal_length'
   const [xAttribute, setxAttribute] = useState(initialxAttribute)
@@ -49,10 +54,14 @@ function App() {
   const yValue = d => d[yAttribute];
   const yAxisLabel = getLbael(yAttribute)
 
+  const colorLegendLabel = 'Species';
+  const colorValue = d => d.species;
+
   if(!data){
     return <pre>Loading ...</pre>
   }
 
+  const filteredData = data.filter(d => hoveredValue === colorValue(d))
 
   const innerHeight = height - margin.top - margin.bottom
   const innerWidth = width - margin.left - margin.right
@@ -70,6 +79,9 @@ function App() {
                   .domain(extent(data, yValue))
                   .range([0, innerHeight])
  
+  const colorScale = scaleOrdinal()
+                      .domain(data.map(colorValue))
+                      .range(["#E6842A", "#137B80", "#8E6C8A"])
 
   return (
     <>
@@ -118,15 +130,53 @@ function App() {
           transform={`translate(${-yAxisLabelOffset}, ${innerHeight / 2} )rotate(-90)`}
         >{yAxisLabel}</text>
 
+        <g transform={`translate(${innerWidth + 50},${margin.bottom})`}>
+          <ColorLegend 
+            colorScale={colorScale}
+            tickSpacing = {22}
+            tickSize = {radius}
+            tickTextOffset = {12}
+            onHover={setHoveredValue}
+            hoveredValue={hoveredValue}
+            fadeOpacity={fadeOpacity}
+          />
+
+          <text
+            x={35}
+            y={-25}
+            className='axis-label'       
+            textAnchor='middle'
+
+          >{colorLegendLabel}</text>
+
+        </g>
+
+        <g opacity={hoveredValue ? fadeOpacity : 1}>
+          <Scatter 
+            data={data}
+            xScale = {xScale}
+            yScale = {yScale}
+            colorScale = {colorScale}
+            xValue = {xValue}
+            yValue = {yValue}
+            colorValue = {colorValue}
+            tooltipFormat = {xAxisTickFormat}
+            radius={radius}
+          />
+        </g>
+
         <Scatter 
-          data={data}
+          data={filteredData}
           xScale = {xScale}
           yScale = {yScale}
+          colorScale = {colorScale}
           xValue = {xValue}
           yValue = {yValue}
+          colorValue = {colorValue}
           tooltipFormat = {xAxisTickFormat}
-          radius={7}
+          radius={radius}
         />
+
         </g>
       </svg>
     </>

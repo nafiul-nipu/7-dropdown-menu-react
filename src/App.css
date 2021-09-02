@@ -7,10 +7,11 @@
 
 .tick text{
   fill: #8e8883;
+  cursor: default;
 }
-.mark{
+/* .mark{
   fill: #137B80;
-}
+} */
 .axis-label, .dropdown-label{
   font-size: 2.5em;
   color: #8e8883;
